@@ -32,7 +32,7 @@ The pipeline consists of 7 stages:
 3. Apply the canny edge algorithm.
 4. Apply a "region of interest" mask to eliminate undesired details.
 5. Use the hough algorithm to detect visible lines in the image.
-6. Search the lane lines using the lines detected in stage 5 (RANSAC style).
+6. Search the lane lines using the lines detected in stage 5 (poorly implemented RANSAC).
 7. Merge the original image with a drawing of the lane lines that have been found.
 
 ### Search of the Lane Lines
@@ -115,6 +115,16 @@ This enabled two useful use-cases:
 
 ![Side by Side Debug View][image1]
 
+### No Lane Detected
+
+If the lane line detection is too weak then the code does report that no lane line
+has been detected.
+
+This is implemented using a threshold on the total length of the hough lines reported
+the left or right lane line.
+
+See above screenshot for an illustration.
+
 ### Turning Road
 
 To improve the quality and stability of the lane line detection the top part of the "region
@@ -122,13 +132,6 @@ of interest" has been truncated, making it a trapezoid instead of a triangle.
 
 This was done after noticing that looking too far ahead in the distance when the road is turning
 right or left was introducing noise in the lane line detection.
-
-### No Lane Detected
-
-If the lane line detection is too weak a threshold defined under which 
-
-This is based on the total length of the hough lines reported the left or right
-lane line.
 
 ### Type of Lane Line
 
