@@ -8,18 +8,18 @@ images of the road and find lane lines on the left and right of the car.
 This project should deal with cases where lane lines are continuous and/or
 intermittent.
 
+[//]: # (Image References)
+
+[image1]: ./images/side-by-side.png "Side by Side View"
+[image2]: ./images/lane-detection.png "Lane detection"
+
 ## Results
 
 For the three videos provided we get stable detection of the lane lines, *with
 one notable exception* in the "challenge" video where for a short duration the
 left lane is not detected.
 
-[//]: # (Image References)
-
-[image1]: ./images/side-by-side.png "Side by Side View"
-
----
-
+![Lane Detection][image2]
 
 ## Implementation Details
 
