@@ -50,19 +50,13 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
-def keep_line(x1, y1, x2, y2):
-    if x2 > x1:
-         (sx1, sy1) = (x1, y1)
-         (x1, y1) = (x2, y2)
-         (x2, y2) = (sx1, sy1)
-    # Normalize each vector.
-    norm = np.sqrt((x2-x1)**2 + (y2-y1)**2)
-    (x, y) = ((x2-x1)/norm, (y2-y1)/norm)
-    if y < 0.3 and y > -0.3:
-        return (False, False)
-    return (True, (y1 < y2))
-
 class Line:
+    """
+    This line class is used to implement filtering of lines that should be
+    kept for further processing vs lines that are to be discarded (e.g.
+    almost horizontal lines), and also classify lines as candidates for
+    either the left side of the road or the right side of the road.
+    """
     def __init__(self, x1, y1, x2, y2):
         if x2 < x1:
             self.x1 = x1
@@ -116,42 +110,7 @@ class Line:
         else:
             cv2.line(img, (self.x1, self.y1), (self.x2, self.y2), color_left, thickness)
 
-def draw_lines(img, lines, color_left=[255, 0, 0], color_right=[0, 255, 0], thickness=5):
-    """
-    NOTE: this is the function you might want to use as a starting point once you want to 
-    average/extrapolate the line segments you detect to map out the full
-    extent of the lane (going from the result shown in raw-lines-example.mp4
-    to that shown in P1_example.mp4).  
-    
-    Think about things like separating line segments by their 
-    slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
-    line vs. the right line.  Then, you can average the position of each of 
-    the lines and extrapolate to the top and bottom of the lane.
-    
-    This function draws `lines` with `color` and `thickness`.    
-    Lines are drawn on the image inplace (mutates the image).
-    If you want to make the lines semi-transparent, think about combining
-    this function with the weighted_img() function below
-    """
-    if lines is None:
-        return
-    for line in lines:
-        for x1,y1,x2,y2 in line:
-            (keep, left) = keep_line(x1, y1, x2, y2)
-            if keep:
-                if left:
-                    cv2.line(img, (x1, y1), (x2, y2), color_left, thickness)
-                else:
-                    cv2.line(img, (x1, y1), (x2, y2), color_right, thickness)
-
-def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
-    """
-    `img` should be the output of a Canny transform.
-        
-    Returns an image with hough lines drawn.
-    """
-    lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
-    line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+def draw_lines(line_img, lines, color_left=[255, 0, 0], color_right=[0, 255, 0], thickness=5):
     all_lines = []
     if lines is not None:
         for line in lines:
@@ -203,8 +162,8 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     left_length = ref_length
 
     # Get the width and size of the image.
-    height = img.shape[0]
-    width = img.shape[1]
+    height = line_img.shape[0]
+    width = line_img.shape[1]
 
     # Draw the left line if it has been detected and is long enough.
     if right_length > 100:
@@ -250,6 +209,18 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
         cv2.putText(line_img, "NONE", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
 
     return line_img
+
+def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
+    """
+    `img` should be the output of a Canny transform.
+        
+    Returns an image with hough lines drawn.
+    """
+    lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
+    line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+    draw_lines(line_img, lines)
+    return line_img
+
 
 # Python 3 has support for cool math symbols.
 
